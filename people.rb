@@ -31,3 +31,8 @@ Chris.greeting
 
 Christina = Students.new "Christina"
 Christina.greeting
+
+Chris.teach
+Christina.learn
+
+#You cannot call Teach on Christina becasue she is a student class, which does not contain that method.  Likewise the same for Chris and Learn
