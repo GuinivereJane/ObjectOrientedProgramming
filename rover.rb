@@ -23,7 +23,7 @@ class Plateau
   attr_accessor :x, :y, :rovers  #maximum x and y grid cordinates (size of grid),
                             #rovers is an array to hold the rovers on the pleteau (essentially rovers sit on the plateau)
 
-  def initialize(x,y,rovers)
+  def initialize(x,y)
     @x = x
     @y = y
     @rovers =[]
@@ -36,7 +36,7 @@ class Plateau
 end
 
 class MissionControl
-  attr_accessor :intial_states, :instruciton_sets, :plateau_coords
+  attr_accessor :initial_states, :instruciton_sets, :plateau_coords
 
   def initialize
     @initial_states = {}   #hold the instructions read in from the keyboard.  key will be rover start state
@@ -67,15 +67,19 @@ class MissionControl
       puts "Enter the instruction sequence for this rover"
       puts "L = rotate left R=rotate right M = move forward one grid"
       instruction_holder = gets.chomp  #holds the instructions for this rover.
-      inital_states[state_holder] = instruction_holder
+      self.initial_states[state_holder] = instruction_holder
     end
   end
 
   def create_rovers #create a number of rovers equal to the number of instruction sets sent
     #creates a rover object on the plateu for each key in the hash. 1st rover in first array loaction etc
+    #self.initial_states.each do |key|
+      test_thingy = Plateau.new(5,5)
     #each rover gets an inital location and faciing
     #then creates an instruction set array at mission control. instructions for first rover located in 1 element, etc
     #rover order on plateua and instruction set order at mission control need to be kept synchronus
+
+
   end
 
   def send_instructions  #sends instructions to the rovers
@@ -87,4 +91,4 @@ end
 
 mission_control = MissionControl.new
 mission_control.read_instructions
-puts mission_control.plateau_coords
+mission_control.create_rovers
