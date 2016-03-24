@@ -1,5 +1,5 @@
 class Rover
-  attr_accessor: x,y, facing  #x,y = coordinate location, facing = compass direction
+  attr_accessor :x, :y, :facing  #x,y = coordinate location, facing = compass direction
 
   def initialize(x,y,facing)
     @x = x
@@ -20,7 +20,7 @@ class Rover
 end
 
 class Plateau
-  attr_accessor: x,y,rovers  #maximum x and y grid cordinates (size of grid),
+  attr_accessor :x, :y, :rovers  #maximum x and y grid cordinates (size of grid),
                             #rovers is an array to hold the rovers on the pleteau (essentially rovers sit on the plateau)
 
   def initialize(x,y,rovers)
@@ -36,9 +36,9 @@ class Plateau
 end
 
 class MissionControl
-  attr_accessor: intial_states, instruciton_sets, plateau_cords
+  attr_accessor :intial_states, :instruciton_sets, :plateau_coords
 
-  def initialize(intial_states, instruciton_sets)
+  def initialize
     @initial_states = {}   #hold the instructions read in from the keyboard.  key will be rover start state
                            #element will be the move instructions
     @instruction_sets = [] #index refers to rover number, element refers to instructions for this rover.
@@ -50,9 +50,25 @@ class MissionControl
     puts "Welcome to mission control, you will now set up your plateau and your rovers"
     puts "please ensure you follow the formating instructions!!!!!"
     puts "Enter the the maximum x and y cordinates of the plateau"
-    print "(formant xy) : "
-    plateau_cords = gets.chomp
+    print "(format xy) : "
+    self.plateau_coords = gets.chomp
 
+
+    2.times do
+      puts "Enter the inital location coordinates and the compass facing (N,E,S,W) for this rover"
+      print "(format xyN) : "
+      state_holder = gets.chomp   #holds the state of this rover
+      #check to make sure rover is being created at coords that exsist on the plateau
+      until ((state_holder[0].to_i <= plateau_coords[0].to_i && state_holder[1].to_i <= plateau_coords[1].to_i)) do
+        puts "Those coordinates are outside the orginal plateau, please enter new coordinates."
+        print "(format xyN) : "
+        state_holder = gets.chomp   #stateHolder is temporary, being used to store current data entry
+      end
+      puts "Enter the instruction sequence for this rover"
+      puts "L = rotate left R=rotate right M = move forward one grid"
+      instruction_holder = gets.chomp  #holds the instructions for this rover.
+      inital_states[state_holder] = instruction_holder
+    end
   end
 
   def create_rovers #create a number of rovers equal to the number of instruction sets sent
@@ -71,3 +87,4 @@ end
 
 mission_control = MissionControl.new
 mission_control.read_instructions
+puts mission_control.plateau_coords
