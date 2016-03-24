@@ -23,31 +23,34 @@ class Plateau
   attr_accessor :x, :y, :rovers  #maximum x and y grid cordinates (size of grid),
                             #rovers is an array to hold the rovers on the pleteau (essentially rovers sit on the plateau)
 
-  def initialize(x,y)
-    @x = x
-    @y = y
+  def initialize
+    @x = 0
+    @y = 0
     @rovers =[]
   end
 
   def add_rover(rover)
     #pushs a rover into the rover array.
+    self.rovers.push rover
   end
 
 end
 
 class MissionControl
-  attr_accessor :initial_states, :instruciton_sets, :plateau_coords
+  attr_accessor :initial_rover_states, :instruciton_sets, :plateau
 
   def initialize
-    @initial_states = {}   #hold the instructions read in from the keyboard.  key will be rover start state
+    @initial_rover_states = {}   #hold the instructions read in from the keyboard.  key will be rover start state
                            #element will be the move instructions
     @instruction_sets = [] #index refers to rover number, element refers to instructions for this rover.
-    @plateau_coords = "00"  #x,y cordintes of the maximum postions on the plateau
+    @plateau = Plateau.new  #THE plateau
   end
 
-  #start things up
+  #start things up and control the code here
+
   def go
-    mission_control.read_instructions
+    self.read_instructions
+    self.create_rovers
   end
 
 
@@ -57,8 +60,8 @@ class MissionControl
     puts "please ensure you follow the formating instructions!!!!!"
     puts "Enter the the maximum x and y cordinates of the plateau"
     print "(format xy) : "
-    self.plateau_coords = gets.chomp
-
+    plateau_coords = gets.chomp
+    self.build_the_plateau(plateau_coords[0].to_i,plateau_coords[1].to_i)
     2.times do
       puts "Enter the inital location coordinates and the compass facing (N,E,S,W) for this rover"
       print "(format xyN) : "
@@ -72,13 +75,24 @@ class MissionControl
       puts "Enter the instruction sequence for this rover"
       puts "L = rotate left R=rotate right M = move forward one grid"
       instruction_holder = gets.chomp  #holds the instructions for this rover.
-      self.initial_states[state_holder] = instruction_holder
+      self.initial_rover_states[state_holder] = instruction_holder
     end
+    puts "I AM HERE #{self.initial_rover_states.length}"
+#SOMETHING IS WORNG HERE !!!! FIX ME FIX ME FIX ME
+
   end
+  def build_the_plateau(plat_x,plat_y)
+    self.plateau.x = plat_x
+    self.plateau.y = plat_y
+  end
+
 
   def create_rovers #create a number of rovers equal to the number of instruction sets sent
     #creates a rover object on the plateu for each key in the hash. 1st rover in first array loaction etc
-    #self.initial_states.each do |key|
+    self.initial_rover_states.each do |key|
+      self.plateau.add_rover Rover.new(key[0].to_i,key[1].to_i,key[2].to_i)
+    end
+    self.plateau.rovers.each {|index| puts "rover #{index.facing}"}
     #each rover gets an inital location and faciing
     #then creates an instruction set array at mission control. instructions for first rover located in 1 element, etc
     #rover order on plateua and instruction set order at mission control need to be kept synchronus
