@@ -45,6 +45,12 @@ class MissionControl
     @plateau_coords = "00"  #x,y cordintes of the maximum postions on the plateau
   end
 
+  #start things up
+  def go
+    mission_control.read_instructions
+  end
+
+
   def read_instructions  #reads in the initial set of instrcutions
     #reads instructions from the keyboard into a hash.  key = rover inital location, element = string of instructions
     puts "Welcome to mission control, you will now set up your plateau and your rovers"
@@ -52,7 +58,6 @@ class MissionControl
     puts "Enter the the maximum x and y cordinates of the plateau"
     print "(format xy) : "
     self.plateau_coords = gets.chomp
-
 
     2.times do
       puts "Enter the inital location coordinates and the compass facing (N,E,S,W) for this rover"
@@ -74,7 +79,6 @@ class MissionControl
   def create_rovers #create a number of rovers equal to the number of instruction sets sent
     #creates a rover object on the plateu for each key in the hash. 1st rover in first array loaction etc
     #self.initial_states.each do |key|
-      test_thingy = Plateau.new(5,5)
     #each rover gets an inital location and faciing
     #then creates an instruction set array at mission control. instructions for first rover located in 1 element, etc
     #rover order on plateua and instruction set order at mission control need to be kept synchronus
@@ -89,6 +93,4 @@ class MissionControl
 end
 
 
-mission_control = MissionControl.new
-mission_control.read_instructions
-mission_control.create_rovers
+MissionControl.new.go
