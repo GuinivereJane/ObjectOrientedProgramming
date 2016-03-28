@@ -25,7 +25,7 @@ class Rover
   end
 
   def look_before_you_leap
-    #this returns a string XY, x and y are the cordinates that the rover will be at if it moves forward
+    #this returns a array [x,y], x and y are the cordinates that the rover will be at if it moves forward
     case self.facing
     when NORTH
       return [x,self.y+1]
@@ -99,7 +99,6 @@ class Plateau
   end
 
   def is_coord_off_plateau?(coord_x,coord_y)
-    puts "I AM HERE #{y}"
     return true if coord_x.to_i < 0 || coord_x.to_i > x || coord_y.to_i < 0 || coord_y.to_i > y
     false
   end
@@ -180,13 +179,13 @@ class MissionControl
         when "L", "R"
           current_rover.turn inst
         when "M"
+#rover will not move if the next move will endanger it
           next_move = current_rover.look_before_you_leap
           problem = true if self.plateau.is_there_a_rover?(next_move[0], next_move[1])
           problem = true if self.plateau.is_coord_off_plateau?(next_move[0], next_move[1])
 
           problem |= false
           if problem
-             puts"I will not accept this move command"
           else
             current_rover.move
           end
