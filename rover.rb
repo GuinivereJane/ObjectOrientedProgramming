@@ -1,21 +1,78 @@
 class Rover
   attr_accessor :x, :y, :facing  #x,y = coordinate location, facing = compass direction
 
+  NORTH = 1
+  EAST = 2
+  SOUTH = 3
+  WEST = 4
+
   def initialize(x,y,facing)
-    @x = x
-    @y = y
-    @facing = facing
+    @x = x.to_i
+    @y = y.to_i
+    @facing = 0
+
+    case facing
+    when "N"
+      self.facing = NORTH
+    when "E"
+      self.facing = EAST
+    when "S"
+      self.facing = SOUTH
+    when "W"
+      self.facing = WEST
+    end
+
   end
 
-
-
-  def move  #1) checks if move is safe (not off edge, no collision)
-            #2) moves rover
-            #Return final x,y cordinates and facing
+  def look_before_you_leap
+    #this returns a string XY, x and y are the cordinates that the rover will be at if it moves forward
+    case self.facing
+    when NORTH
+      return "#{x}#{self.y+1}"
+    when EAST
+      return "#{self.x+1}#{y}"
+    when SOUTH
+      return "#{x}#{self.y-1}"
+    when WEST
+      return "#{self.y}#{y}"
+    end
   end
 
-  def turn #rotates rover left or right 90 degrees
-            #called from rover.move
+  def move
+    case self.facing
+    when NORTH
+      self.y += 1
+    when EAST
+      self.x += 1
+    when SOUTH
+      self.y -= 1
+    when WEST
+      self.x -= 1
+    end
+
+  end
+
+  def turn(direction)#rotates rover left or right 90 degrees
+    case direction
+    when "R"
+      self.facing == 4 ? self.facing = 1 : self.facing += 1
+    when "L"
+      self.facing == 1 ? self.facing = 4 : self.facing -= 1
+    end
+  end
+
+  def status_report
+    print "#{self.x} #{self.y} "
+    case self.facing
+    when NORTH
+      puts "N"
+    when EAST
+      puts "E"
+    when SOUTH
+      puts "S"
+    when WEST
+      puts "W"
+    end
   end
 
 
@@ -23,7 +80,6 @@ end
 
 class Plateau
   attr_accessor :x, :y, :rovers  #maximum x and y grid cordinates (size of grid),
-                            #rovers is an array to hold the rovers on the pleteau (essentially rovers sit on the plateau)
 
   def initialize
     @x = 0
@@ -42,8 +98,8 @@ class Plateau
     false
   end
 
-  def is_coord_on_plateau(coord_x,coord_y)
-    return true if coord_x.to_i >= 0 && coord_x.to_i <= x && coord_y.to_i >= 0 && coord_y.to_i <= y
+  def is_coord_off_plateau?(coord_x,coord_y)
+    return true if coord_x.to_i < 0 || coord_x.to_i > x || coord_y.to_i < 0 || coord_y.to_i > y
     false
   end
 
@@ -54,7 +110,6 @@ class MissionControl
 
   def initialize
     @initial_rover_states = {}   #hold the instructions read in from the keyboard.  key will be rover start state
-                           #element will be the move instructions
     @instruction_sets = [] #index refers to rover number, element refers to instructions for this rover.
     @plateau = Plateau.new  #THE plateau
   end
@@ -65,6 +120,7 @@ class MissionControl
     self.read_instructions
     self.create_rovers
     self.send_instructions
+    self.check_rovers
   end
 
 
@@ -73,23 +129,23 @@ class MissionControl
     puts "Welcome to mission control, you will now set up your plateau and your rovers"
     puts "please ensure you follow the formating instructions!!!!!"
     puts "Enter the the maximum x and y cordinates of the plateau"
-    print "(format xy) : "
+    print "(format x y) : "
     plateau_coords = gets.chomp
-    self.build_the_plateau(plateau_coords[0].to_i,plateau_coords[1].to_i)
+    self.build_the_plateau(plateau_coords[0].to_i,plateau_coords[2].to_i)
     collision_on_launch = []
     2.times do
       puts "Enter the inital location coordinates and the compass facing (N,E,S,W) for this rover"
-      print "(format xyN) : "
+      print "(format x y N) : "
       state_holder = gets.chomp   #holds the state of this rover
-      until !(collision_on_launch.include? state_holder[0]+state_holder[1]) do
+      until !(collision_on_launch.include? state_holder[0]+state_holder[2]) do
         puts "Launching a rover to those coordinates would result in a collision"
         print "Please enter new coordinates (format xyN) :"
         state_holder = gets.chomp
       end
-      collision_on_launch.push state_holder[0]+state_holder[1]
+      collision_on_launch.push state_holder[0]+state_holder[2]
 
       #check to make sure rover is being created at coords that exsist on the plateau
-      until ((state_holder[0].to_i <= plateau_coords[0].to_i && state_holder[1].to_i <= plateau_coords[1].to_i)) do
+      until ((state_holder[0].to_i <= plateau_coords[0].to_i && state_holder[2].to_i <= plateau_coords[2].to_i)) do
         puts "Those coordinates are outside the orginal plateau, please enter new coordinates."
         print "(format xyN) : "
         state_holder = gets.chomp   #stateHolder is temporary, being used to store current data entry
@@ -111,28 +167,39 @@ class MissionControl
   def create_rovers #create a number of rovers equal to the number of instruction sets sent
     #creates a rover object on the plateu for each key in the hash. 1st rover in first array loaction etc
     self.initial_rover_states.each_key do |rover_state|
-      self.plateau.add_rover Rover.new rover_state[0], rover_state[1], rover_state[2]
+      self.plateau.add_rover Rover.new rover_state[0], rover_state[2], rover_state[4]
     end
-    #rover order on plateua and instruction set order at mission control need to be kept synchronus
-
-
   end
 
   def send_instructions  #sends instructions to the rovers
     self.initial_rover_states.each do |key, element|
       current_rover = self.plateau.rovers.pop
-      element.each_char {|instruction| print "#{instruction},"}
+      element.each_char do |inst|
+        case inst
+        when "L", "R"
+          current_rover.turn inst
+        when "M"
+          next_move = current_rover.look_before_you_leap
+          problem = true if self.plateau.is_there_a_rover?(next_move[0], next_move[1])
+          problem = ture if self.plateau.is_coord_off_plateau?(next_move[0], next_move[1])
+          problem |= false
+          if problem
+             puts"I will not accept this move command"
+          else
+            current_rover.move
+          end
+        end
+        end
       self.plateau.rovers.insert(0,current_rover)
       puts
     end
-
-puts "testing is on plateau = #{self.plateau.is_coord_on_plateau("9", "1")}"
-
-    #iterate through inital_states to find insturction sets when needed using |key,Element|
-
-    #work through instruction array sending all moves for each rover, one at a time, then moveing onto next rover,
-    #if rover reports a hazard stop movement, track final location and report reason for stoping
   end
+
+  def check_rovers
+    self.plateau.rovers.reverse_each {|rover| rover.status_report}
+
+  end
+
 end
 
 
