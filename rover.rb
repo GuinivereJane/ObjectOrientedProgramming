@@ -28,13 +28,14 @@ class Rover
     #this returns a string XY, x and y are the cordinates that the rover will be at if it moves forward
     case self.facing
     when NORTH
-      return "#{x}#{self.y+1}"
-    when EAST
-      return "#{self.x+1}#{y}"
-    when SOUTH
-      return "#{x}#{self.y-1}"
-    when WEST
-      return "#{self.y}#{y}"
+      return [x,self.y+1]
+  #  when EAST
+
+    #  return "#{self.x+1}#{y}"
+  #  when SOUTH
+  #    return "#{x}#{self.y-1}"
+  #  when WEST
+  #    return "#{self.y}#{y}"
     end
   end
 
@@ -99,6 +100,7 @@ class Plateau
   end
 
   def is_coord_off_plateau?(coord_x,coord_y)
+    puts "I AM HERE #{y}"
     return true if coord_x.to_i < 0 || coord_x.to_i > x || coord_y.to_i < 0 || coord_y.to_i > y
     false
   end
@@ -181,7 +183,8 @@ class MissionControl
         when "M"
           next_move = current_rover.look_before_you_leap
           problem = true if self.plateau.is_there_a_rover?(next_move[0], next_move[1])
-          problem = ture if self.plateau.is_coord_off_plateau?(next_move[0], next_move[1])
+          problem = true if self.plateau.is_coord_off_plateau?(next_move[0], next_move[1])
+
           problem |= false
           if problem
              puts"I will not accept this move command"
@@ -197,9 +200,7 @@ class MissionControl
 
   def check_rovers
     self.plateau.rovers.reverse_each {|rover| rover.status_report}
-
   end
-
 end
 
 
