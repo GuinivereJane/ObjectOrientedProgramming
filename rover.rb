@@ -29,13 +29,12 @@ class Rover
     case self.facing
     when NORTH
       return [x,self.y+1]
-  #  when EAST
-
-    #  return "#{self.x+1}#{y}"
-  #  when SOUTH
-  #    return "#{x}#{self.y-1}"
-  #  when WEST
-  #    return "#{self.y}#{y}"
+    when EAST
+      return [self.x+1,y]
+    when SOUTH
+      return [x,self.y-1]
+    when WEST
+      return [self.x-1,y]
     end
   end
 
