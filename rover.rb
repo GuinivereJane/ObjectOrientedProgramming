@@ -9,7 +9,7 @@ class Rover
   def initialize(x,y,facing)
     @x = x.to_i
     @y = y.to_i
-    @facing = 0
+    @facing = facing
 
     case facing
     when "N"
